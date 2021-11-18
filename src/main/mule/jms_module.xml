@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config3" doc:name="HTTP Listener config" doc:id="28aae1b6-5473-43aa-9aed-4b34f89616b4" >
+		<http:listener-connection host="0.0.0.0" port="8088" />
+	</http:listener-config>
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="eb66473a-8086-4d11-85bd-29ef71512111" >
+		<jms:active-mq-connection username="admin" password="admin" >
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		</jms:active-mq-connection>
+	</jms:config>
+	<flow name="jms_moduleFlow" doc:id="641b85f7-1ff8-4ea9-977a-255ad7f6d343" >
+		<http:listener doc:name="Listener" doc:id="279a969f-f80c-4677-a39d-72c6c39102d0" config-ref="HTTP_Listener_config3" path="/jmstest1"/>
+		<jms:publish doc:name="Publish" doc:id="8190782e-92a0-4682-bf3b-d033b1e4622b" config-ref="JMS_Config" destination="testtopic" destinationType="TOPIC">
+			<jms:message outboundContentType="application/json" />
+		</jms:publish>
+	</flow>
+	<flow name="jms_moduleFlow1" doc:id="794aadca-1278-4b42-928d-736a3e9fb0e6" >
+		<jms:listener doc:name="On New Message" doc:id="0b3663d0-a301-457d-9802-e9fa8f2533a2" config-ref="JMS_Config" destination="testtopic" inboundContentType="application/json" numberOfConsumers="1">
+			<jms:consumer-type >
+				<jms:topic-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="3a6ff95c-9844-4132-af52-22cdc60bbc9e" message="#[payload]"/>
+	</flow>
+</mule>
